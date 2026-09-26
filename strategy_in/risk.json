@@ -1,0 +1,8 @@
+{
+  "_comment": "AGENT/OPERATOR-EDITABLE sizing policy. Hard caps live in config_in/config.json and core_in/validate.py; those always win.",
+  "version": 1,
+  "default_lots": 1,
+  "min_edge_pct": 0.15,
+  "min_edge_notes": "No settled history yet. min_edge_pct is read as: est_prob_itm must imply an expected value at least this fraction above the premium paid, i.e. (est_prob_itm * expected_payoff - premium) / premium >= min_edge_pct. Revisit once n>=30 settled positions exist, the same way strategy/risk.json in the Polymarket track waits for n>=50.",
+  "max_positions_per_category_per_cycle": 2
+}

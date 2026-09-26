@@ -1,0 +1,26 @@
+{
+  "_comment": "Caps for the India paper-trading track. Not CI-enforced yet (see README_IN.md) but core_in/validate.py checks it locally the same way core/validate.py checks config/protected.json. Treat this file the way the operator treats config/protected.json: raising a cap is a deliberate decision, not something the agent talks itself into during a cycle.",
+  "data_source": "mock",
+  "sim_capital_inr": 100000.0,
+  "max_premium_per_trade_inr": 2000.0,
+  "max_open_positions": 10,
+  "max_new_positions_per_cycle": 3,
+  "max_capital_per_underlying_inr": 6000.0,
+  "min_days_to_expiry": 1,
+  "max_days_to_expiry": 30,
+  "allowed_underlyings": ["NIFTY", "BANKNIFTY"],
+  "allowed_option_types": ["CE", "PE"],
+  "lot_sizes": {
+    "_comment": "NSE revises these periodically (most recently for NIFTY/BANKNIFTY in 2025). VERIFY against the current NSE circular before placing anything real — a stale lot size silently changes your real position size.",
+    "NIFTY": 75,
+    "BANKNIFTY": 15
+  },
+  "market_hours_ist": {"open": "09:15", "close": "15:30"},
+  "real_trading_enabled": false,
+  "real": {
+    "_comment": "Mirrors config/protected.json's real block. Left in place so flipping this on later is a config change, not a redesign. core_in/validate.py enforces these as hard ceilings; core_in/broker_angelone.py refuses to place a real order unless real_trading_enabled is true AND these are all present.",
+    "max_premium_per_trade_inr": 500.0,
+    "max_open_positions": 3,
+    "daily_capital_cap_inr": 1000.0
+  }
+}
