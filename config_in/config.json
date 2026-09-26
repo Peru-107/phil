@@ -11,9 +11,9 @@
   "allowed_underlyings": ["NIFTY", "BANKNIFTY"],
   "allowed_option_types": ["CE", "PE"],
   "lot_sizes": {
-    "_comment": "NSE revises these periodically (most recently for NIFTY/BANKNIFTY in 2025). VERIFY against the current NSE circular before placing anything real — a stale lot size silently changes your real position size.",
-    "NIFTY": 75,
-    "BANKNIFTY": 15
+    "_comment": "Confirmed 2026-09-26 by reading the live OpenAPIScripMaster.json directly (NFO/OPTIDX rows for NIFTY and BANKNIFTY) rather than assumed — but NSE revises lot sizes periodically, so re-check before placing anything real if much time has passed.",
+    "NIFTY": 65,
+    "BANKNIFTY": 30
   },
   "market_hours_ist": {"open": "09:15", "close": "15:30"},
   "real_trading_enabled": false,

@@ -115,19 +115,24 @@ def scrip_master():
 
 
 def find_token(underlying, expiry, strike, option_type):
-    """expiry as YYYY-MM-DD; returns (symboltoken, tradingsymbol) or None."""
-    exp_fmt = dt.date.fromisoformat(expiry).strftime("%d%b%y").upper()
-    want_strike = f"{int(strike * 100):08d}"  # scrip master strikes are paise, zero-padded
+    """expiry as YYYY-MM-DD; returns (symboltoken, tradingsymbol) or None.
+
+    Verified 2026-09-26 against the live OpenAPIScripMaster.json: expiry is
+    "%d%b%Y" (4-digit year, e.g. "06OCT2026"), strike is price*100 formatted
+    as "%.6f" (e.g. strike 21100 -> "2110000.000000"), and matching must go
+    through the `name` field, not `symbol.startswith(underlying)` — NIFTY's
+    symbol prefix also matches NIFTYNXT50 and NIFTYFPI rows.
+    """
+    exp_fmt = dt.date.fromisoformat(expiry).strftime("%d%b%Y").upper()
+    want_strike = f"{strike * 100:.6f}"
     for row in scrip_master():
-        if row.get("exch_seg") != "NFO":
+        if row.get("exch_seg") != "NFO" or row.get("instrumenttype") != "OPTIDX":
+            continue
+        if row.get("name") != underlying:
+            continue
+        if row.get("expiry") != exp_fmt or row.get("strike") != want_strike:
             continue
         sym = row.get("symbol", "")
-        if not sym.startswith(underlying):
-            continue
-        if row.get("expiry") != exp_fmt:
-            continue
-        if row.get("strike") != want_strike:
-            continue
         if not sym.endswith(option_type):
             continue
         return row["token"], sym
@@ -164,12 +169,13 @@ class AngelOneQuoteSource:
         }
 
     def underlying_ltp(self, underlying):
-        """VERIFY the index token before trusting this — the scrip master's
-        index rows are matched by name substring here, not a hardcoded
-        token, but that match has never been run against a live account."""
-        name = "NIFTY 50" if underlying == "NIFTY" else "NIFTY BANK"
+        """Verified 2026-09-26 against the live scrip master: the index row
+        has exch_seg NSE, instrumenttype AMXIDX, and name == the plain
+        underlying ("NIFTY" token 99926000, "BANKNIFTY" token 99926009) —
+        quote auth itself is still untested against a live account."""
         for row in scrip_master():
-            if row.get("exch_seg") == "NSE" and row.get("name") == name:
+            if (row.get("exch_seg") == "NSE" and row.get("instrumenttype") == "AMXIDX"
+                    and row.get("name") == underlying):
                 resp = _post("/rest/secure/angelbroking/market/v1/quote",
                              self.api_key, self.jwt,
                              {"mode": "LTP", "exchangeTokens": {"NSE": [row["token"]]}})
